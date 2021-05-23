@@ -1,7 +1,7 @@
 #include <string>
 #include <cstring>
 #include <cassert>
-#include <type_traits>
+#include <iostream>
 
 struct ci_char_traits : public std::char_traits<char> {
     static bool eq(char lhs, char rhs) {
@@ -44,10 +44,21 @@ struct ci_char_traits : public std::char_traits<char> {
     }
 };
 
-typedef std::basic_string<char, ci_char_traits> ci_string;
+using ci_string = std::basic_string<char, ci_char_traits>;
+
+std::ostream &operator<<(std::ostream &out, ci_string &s) {
+    out << s.c_str();
+    return out;
+}
+
+std::string operator+(const std::string &lhs, const ci_string &rhs) {
+    return lhs + std::string(rhs.c_str());
+}
 
 int main() {
     ci_string s("AbCdE");
+    std::cout << s << std::endl;
+
     // Нечувствительно к регистру
     assert(s == "abcde");
     assert(s == "ABCDE");
@@ -56,5 +67,10 @@ int main() {
     // Остается чувствительно к регистру
     assert(strcmp(s.c_str(), "AbCdE") == 0);
     assert(strcmp(s.c_str(), "abcde") != 0);
+    // операция сложения
+    std::string a = "aaa";
+    ci_string b = "bbb";
+    std::string c = a + b;
+    assert(c == "aaabbb");
     return 0;
 }
