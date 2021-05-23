@@ -1,6 +1,7 @@
 #include <string>
 #include <cstring>
 #include <cassert>
+#include <type_traits>
 
 struct ci_char_traits : public std::char_traits<char> {
     static bool eq(char lhs, char rhs) {
@@ -11,6 +12,9 @@ struct ci_char_traits : public std::char_traits<char> {
         return std::tolower(lhs) < std::tolower(rhs);
     }
 
+    // if s1 > s2  ->  1
+    // if s1 == s2 ->  0
+    // if s1 < s2  -> -1
     static int compare(const char *s1,
                        const char *s2,
                        size_t n) {
@@ -23,6 +27,11 @@ struct ci_char_traits : public std::char_traits<char> {
             }
             ++s1;
             ++s2;
+        }
+        if (*s1 != '\0' && *s2 == '\0') {
+            return 1;
+        } else if (*s1 != '\0' && *s2 == '\0') {
+            return -1;
         }
         return 0;
     }
@@ -42,6 +51,8 @@ int main() {
     // Нечувствительно к регистру
     assert(s == "abcde");
     assert(s == "ABCDE");
+    assert(s != "abc");
+    assert(s.compare("abcdee") == -1);
     // Остается чувствительно к регистру
     assert(strcmp(s.c_str(), "AbCdE") == 0);
     assert(strcmp(s.c_str(), "abcde") != 0);
